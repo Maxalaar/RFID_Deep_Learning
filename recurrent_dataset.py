@@ -1,6 +1,6 @@
 from general_include import *
 
-def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_save, num_element, num_repetitions_target=1, num_repetitions_zone=1, verbose=False):
+def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_save, num_element_dataset, num_element_path=30, num_repetitions_zone=1, verbose=False):
     print()
     print("--- Create Tracking Dataset ---")
     print()
@@ -44,23 +44,26 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
         print()
 
     list_list_zone_index = []
-    for _ in range (0, num_element):
-        # We choose a init zone and target zone at random for creat list of zone
-        if isinstance(num_repetitions_target, int):
-            num_repetitions_target_prov = num_repetitions_target
-        else:
-            num_repetitions_target_prov = random.randint(num_repetitions_target[0], num_repetitions_target[1])
+    for _ in range (0, num_element_dataset):
 
         list_zone_index = []
 
-        frame = []
-        data = None
-        
+        # We choose a init zone and target zone at random for creat list of zone
         x_zone_init = random.randrange(0, num_colonne, 1)
         y_zone_init = random.randrange(0, num_row, 1)
 
         x_zone = x_zone_init
         y_zone = y_zone_init
+        
+        # if isinstance(num_repetitions_target, int):
+        #     num_repetitions_target_prov = num_repetitions_target
+        # else:
+        #     num_repetitions_target_prov = random.randint(num_repetitions_target[0], num_repetitions_target[1])
+
+        frame = []
+        data = None
+        
+
 
         # add init zone in zone list
         if isinstance(num_repetitions_zone, int):
@@ -69,9 +72,11 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
             num_repetitions_zone_prov = random.randint(num_repetitions_zone[0], num_repetitions_zone[1])
             
         for j in range(0, num_repetitions_zone_prov):
-            list_zone_index.append((x_zone, y_zone))
+            if len(list_zone_index) < num_element_path:
+                list_zone_index.append((x_zone, y_zone))
 
-        for i in range(0, num_repetitions_target_prov):
+        # for i in range(0, num_repetitions_target_prov):
+        while len(list_zone_index) < num_element_path:
 
             x_zone_target = random.randrange(0, num_colonne, 1)
             y_zone_target = random.randrange(0, num_row, 1)
@@ -120,7 +125,8 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
                     num_repetitions_zone_prov = random.randint(num_repetitions_zone[0], num_repetitions_zone[1])
                     
                 for j in range(0, num_repetitions_zone_prov):
-                    list_zone_index.append((x_zone, y_zone))
+                    if len(list_zone_index) < num_element_path:
+                        list_zone_index.append((x_zone, y_zone))
 
         # for each zone give some measure
         for i in range(0, len(list_zone_index)):
@@ -144,12 +150,19 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
     dataset_complete_Y_list = []
 
     for i in range(0, len(dataset_complete_Y_pandas)):
-        dataset_complete_X_list.append(dataset_complete_X_pandas[i].values.tolist())
-        dataset_complete_Y_list.append(dataset_complete_Y_pandas[i].values.tolist())
+        dataset_complete_X_list.append(dataset_complete_X_pandas[i].to_numpy())
+        dataset_complete_Y_list.append(dataset_complete_Y_pandas[i].to_numpy())
 
     # Convert Python list to Tensorflow Tensor
-    X_tensor = tf.ragged.constant(dataset_complete_X_list).to_tensor()
-    Y_tensor = tf.ragged.constant(dataset_complete_Y_list).to_tensor()
+    X_tensor = tf.convert_to_tensor(dataset_complete_X_list)
+    Y_tensor = tf.convert_to_tensor(dataset_complete_Y_list)
+
+    # X_tensor = tf.ragged.constant(dataset_complete_X_list)
+    # Y_tensor = tf.ragged.constant(dataset_complete_Y_list)
+
+    # print(type(X_tensor))
+    # X_tensor = X_tensor.to_tensor()
+    # Y_tensor = Y_tensor.to_tensor()
 
     if verbose:
         for i in range(0, len(X_tensor)):

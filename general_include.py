@@ -33,5 +33,8 @@ def environment_info():
     print("Python version : " + str(sys.version_info[0]) + "." + str(sys.version_info[1]) + "." + str(sys.version_info[2]))
     print()
 
+    print("Tensorflow version : " + str(tf.__version__))
+    print()
+
     print("Number of GPU available for Tensorflow :", len(tf.config.list_physical_devices('GPU')))
     print()
