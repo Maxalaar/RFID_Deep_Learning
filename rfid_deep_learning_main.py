@@ -7,9 +7,12 @@ from dense_neural_network_classifier import *
 
 environment_info()
 
-# create_tracking_dataset("kitchen_20cm", "debug_kitchen_20cm", 10, 1, 1, 2, 3, verbose=False)
+# create_tracking_dataset(2, 3, "debug_dataset", "debug_reccurent_simple_dataset", 2, num_repetitions_target=1, num_repetitions_zone=1, verbose=True)
 
-# data_X, data_Y = load_tracking_dataset("debug_kitchen_20cm")
+create_tracking_dataset(10, 19, "kitchen_20cm", "debug_reccurrent_kitchen_20cm", 2, num_repetitions_target=1, num_repetitions_zone=1, verbose=True)
+
+# data_X, data_Y = load_tracking_dataset("debug_reccurent_dataset")
+
 # data_X, data_Y = load_tracking_dataset("test_kitchen_20cm")
 # recurrent_neural_network_classifier(data_X, data_Y)
 
