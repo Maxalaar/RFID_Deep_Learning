@@ -6,7 +6,7 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
     print()
 
     # Load the dataset
-    dataset_data = arff.loadarff('/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/'+str(name_dataset)+'.arff')
+    dataset_data = arff.loadarff('./dataset/dataset_arff/'+str(name_dataset)+'.arff')
     dataset_complete = []
 
     # Convert the dataset, arff to DataFram
@@ -15,7 +15,7 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
     # Convert Y to one hot
     Y_one_hot = pd.get_dummies(dataset_df["class"])
     list_target_name = list(Y_one_hot.columns)
-    dataset_df = dataset_df.copy().drop("class",axis=1)
+    dataset_df = dataset_df.copy().drop("class", axis=1)
     dataset_df = pd.concat([dataset_df, Y_one_hot], axis=1)
 
     # Creat map of zone
@@ -54,11 +54,6 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
 
         x_zone = x_zone_init
         y_zone = y_zone_init
-        
-        # if isinstance(num_repetitions_target, int):
-        #     num_repetitions_target_prov = num_repetitions_target
-        # else:
-        #     num_repetitions_target_prov = random.randint(num_repetitions_target[0], num_repetitions_target[1])
 
         frame = []
         data = None
@@ -145,7 +140,7 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
         dataset_complete_X_pandas.append(data.copy().drop(list_target_name, axis=1))
         dataset_complete_Y_pandas.append(data[list_target_name])
 
-    # Convert Pandas dataset to Python list
+    # Convert Pandas dataset to numpy
     dataset_complete_X_list = []
     dataset_complete_Y_list = []
 
@@ -153,16 +148,9 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
         dataset_complete_X_list.append(dataset_complete_X_pandas[i].to_numpy())
         dataset_complete_Y_list.append(dataset_complete_Y_pandas[i].to_numpy())
 
-    # Convert Python list to Tensorflow Tensor
+    # Convert numpy to Tensorflow Tensor
     X_tensor = tf.convert_to_tensor(dataset_complete_X_list)
     Y_tensor = tf.convert_to_tensor(dataset_complete_Y_list)
-
-    # X_tensor = tf.ragged.constant(dataset_complete_X_list)
-    # Y_tensor = tf.ragged.constant(dataset_complete_Y_list)
-
-    # print(type(X_tensor))
-    # X_tensor = X_tensor.to_tensor()
-    # Y_tensor = Y_tensor.to_tensor()
 
     if verbose:
         for i in range(0, len(X_tensor)):
@@ -184,11 +172,11 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
             print()
     
     # Save tensor
-    open_file = open("/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/"+ str(name_save) +"_X.sav", "wb")
+    open_file = open("./dataset/dataset_sav/"+ str(name_save) +"_X.sav", "wb")
     pickle.dump(X_tensor, open_file)
     open_file.close()
 
-    open_file = open("/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/"+ str(name_save) +"_Y.sav", "wb")
+    open_file = open("./dataset/dataset_sav/"+ str(name_save) +"_Y.sav", "wb")
     pickle.dump(Y_tensor, open_file)
     open_file.close()
 
@@ -198,12 +186,148 @@ def load_tracking_dataset(name_dataset):
     print()
 
     # Load list
-    open_file = open("/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/"+ str(name_dataset) +"_X.sav", "rb")
+    open_file = open("./dataset/dataset_sav/"+ str(name_dataset) +"_X.sav", "rb")
     X_tensor = pickle.load(open_file)
     open_file.close()
 
-    open_file = open("/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/"+ str(name_dataset) +"_Y.sav", "rb")
+    open_file = open("./dataset/dataset_sav/"+ str(name_dataset) +"_Y.sav", "rb")
     Y_tensor = pickle.load(open_file)
     open_file.close()
 
     return X_tensor, Y_tensor
+
+def load_tracking_dataset_txt(name_dataset):
+    with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
+        dataset = []
+        lines = file_var.read().split('\n')
+        file_var.close()
+
+        for i in range(0, len(lines)):
+            lines[i] = lines[i].split(',')
+        
+        list_actual_path = []
+        actual_path_name = lines[1][0]
+
+        for i in range (1, len(lines)):
+            
+            if actual_path_name != lines[i][0]:
+                list_actual_path_np = np.array([list_actual_path], dtype=np.float32)
+                dataset.append(tf.convert_to_tensor(list_actual_path_np))
+                list_actual_path = []
+                actual_path_name = lines[i][0]
+
+            line = lines[i].copy()
+            del line[0]
+            list_actual_path.append(line)
+        
+        return dataset
+
+def load_tracking_dataset_txt_for_fit(list_name_dataset):
+    list_dataset_X = []
+    list_dataset_Y = []
+    list_label = []
+
+    for name_dataset in list_name_dataset:
+        # Creat dataset
+        with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
+            init_len_x = len(list_dataset_X)
+            lines = file_var.read().split('\n')
+            file_var.close()
+
+            for i in range(0, len(lines)):
+                lines[i] = lines[i].split(',')
+
+            # Get list of zones
+            list_zone = lines[0]
+            list_zone.pop()
+            list_label += list_zone
+            
+            list_actual_path = []
+            actual_path_name = lines[1][0]
+
+            for i in range (1, len(lines)):
+                
+                if actual_path_name != lines[i][0]:
+                    # list_actual_path_np = np.array([list_actual_path], dtype=np.float32)
+                    # list_dataset_X.append(tf.convert_to_tensor(list_actual_path_np))
+                    if(len(list_actual_path)>350):
+                        list_dataset_X.append(list_actual_path)
+                    list_actual_path = []
+                    actual_path_name = lines[i][0]
+
+                line = lines[i].copy()
+                del line[0]
+                list_actual_path.append(line)
+            
+            # Creat list datasets Y
+            for i in range(init_len_x, len(list_dataset_X)):
+                dataset_Y_prov = []
+                nbr_element_zone = int(len(list_dataset_X[i])/len(list_zone))
+
+                for j in range(0, len(list_dataset_X[i])):
+                    target = int(j/nbr_element_zone)
+                    if target >= len(list_zone):
+                        target = len(list_zone)-1
+                    dataset_Y_prov.append([list_zone[target]])
+                
+                list_dataset_Y.append(dataset_Y_prov)
+    
+    # get size of the smallest paths
+    size_smallest = float('inf')
+    for dataset in list_dataset_X:
+        if len(dataset) < size_smallest:
+            size_smallest = len(dataset)
+    
+    # Equalize the size of the paths
+    for i in range(0, len(list_dataset_X)):
+        nbr_element_to_remove = len(list_dataset_X[i])-size_smallest
+        for j in range(0, nbr_element_to_remove):
+            index_element_to_remove = random.randrange(0, len(list_dataset_X[i]), 1)
+            list_dataset_X[i].pop(index_element_to_remove)
+            list_dataset_Y[i].pop(index_element_to_remove)
+
+    # Convert Y to one hot
+    label_encoder = preprocessing.LabelEncoder()
+    label_encoder.fit(np.array(list_label))
+    max_value_encoder = label_encoder.transform(np.array(list_label)).max()
+
+    for i in range(0, len(list_dataset_Y)):
+        for j in range(0, len(list_dataset_Y[i])):
+            # print(label_encoder.transform(list_dataset_Y[i][j][0]))
+            # print(np.array(list_dataset_Y[i][j]))
+            index_to_one = label_encoder.transform(np.array(list_dataset_Y[i][j]))
+            data_y_one_hot = np.zeros((1, max_value_encoder + 1))
+            data_y_one_hot[0, index_to_one] = 1
+            list_dataset_Y[i][j] = data_y_one_hot[0]
+    
+    # Convert list to np
+    list_dataset_X = np.array(list_dataset_X).astype('float32')
+    list_dataset_Y = np.array(list_dataset_Y).astype('int')
+
+    # Convert np to tensor
+    X_tensor = tf.convert_to_tensor(list_dataset_X)
+    Y_tensor = tf.convert_to_tensor(list_dataset_Y)
+
+    return X_tensor, Y_tensor
+
+def evaluate_rnn_model(model, evaluation_dataset):
+    # Get list of target
+    name_dataset = "kitchen_20cm"
+    dataset_data = arff.loadarff('./dataset/dataset_arff/'+str(name_dataset)+'.arff')
+    # Convert the dataset, arff to DataFram
+    dataset_df = pd.DataFrame(dataset_data[0])
+    # Convert Y to one hot
+    Y_one_hot = pd.get_dummies(dataset_df["class"])
+    list_target_name = list(Y_one_hot.columns)
+
+    output = model.predict(evaluation_dataset)
+
+    print()
+    print("class : ")
+    for i in range(0, len(output[0])):
+        index = np.argmax(output[0][i])
+        print(str(list_target_name[index]) + ";")
+
+    print()
+
+

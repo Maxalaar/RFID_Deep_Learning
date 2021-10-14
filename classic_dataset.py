@@ -2,7 +2,7 @@ from general_include import *
 
 def load_classic_dataset(name_dataset, verbose=False):
     # Load the dataset
-    dataset_data = arff.loadarff("/home/maxalaar/CodiumProjects/RFID_Deep_Learning/dataset/"+str(name_dataset)+".arff")
+    dataset_data = arff.loadarff("./dataset/dataset_arff/"+str(name_dataset)+".arff")
 
     # Convert the dataset, arff to DataFram
     dataset_df = pd.DataFrame(dataset_data[0])

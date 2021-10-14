@@ -64,6 +64,8 @@ def dense_neural_network_classifier(data_x, data_y, verbose=[]):
 
     model.summary()
 
+    return model
+
     # list all data in history
     # print(history.history.keys())
 

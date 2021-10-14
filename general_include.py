@@ -19,6 +19,25 @@ from keras.layers import Dropout
 from tensorflow.keras import layers
 from tensorflow.keras import regularizers
 
+from keras import backend as K
+
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
 def environment_info():    
     print()
     print("--- Environment Information ---")
@@ -38,3 +57,23 @@ def environment_info():
 
     print("Number of GPU available for Tensorflow :", len(tf.config.list_physical_devices('GPU')))
     print()
+
+def save_model_neural_network(model, model_name):
+    model.save('./saved_model_nn/' + model_name)
+
+def load_model_neural_network(model_name, verbose=True):
+    print()
+    print("--- Load Neural Network ---")
+    print()
+
+    model = tf.keras.models.load_model('./saved_model_nn/' + model_name, custom_objects={'f1_m':f1_m})
+
+    if verbose == True:
+        model.summary()
+
+    return model
+
+def load_checkpoint_neural_network(model, checkpoint_path):
+    checkpoint_dir = os.path.dirname(checkpoint_path)
+    latest = tf.train.latest_checkpoint(checkpoint_dir)
+    model.load_weights(latest)
