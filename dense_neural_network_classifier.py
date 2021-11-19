@@ -1,5 +1,13 @@
 from general_include import *
 
+def prerceptron_classifier(data_x, data_y, verbose=[]):
+    print("--- Prerceptron Classifier ---")
+    print()
+
+    clf = Perceptron(tol=1e-3, random_state=0)
+    clf.fit(data_x, data_y)
+    print(clf.score(data_x, data_y))
+
 def dense_neural_network_classifier(data_x, data_y, verbose=[]):
     print("--- Neural Network Classifier ---")
     print()
@@ -8,54 +16,33 @@ def dense_neural_network_classifier(data_x, data_y, verbose=[]):
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print()
 
-    # formatting the dataset
-    data_x = np.asarray(data_x).astype('float32')
-    data_y = np.asarray(data_y).astype('int')
-
-    # Convert to one hot vector
-    data_y_one_hot = np.zeros((data_y.size, data_y.max() + 1))
-    data_y_one_hot[np.arange(data_y.size), data_y] = 1
+    data_y_one_hot = data_y
 
     # define the keras model
     model = Sequential()
     activation = 'LeakyReLU'
+    coeficient_dropout = 0.04
 
     model.add(Dense(50, activation=activation))
+    model.add(Dropout(coeficient_dropout))
+
     model.add(Dense(50, activation=activation))
+    model.add(Dropout(coeficient_dropout))
+
     model.add(Dense(50, activation=activation))
+    model.add(Dropout(coeficient_dropout))
+
     model.add(Dense(50, activation=activation))
+    model.add(Dropout(coeficient_dropout))
+
     model.add(Dense(50, activation=activation))
-    
-    # nbr_neurone_mid_layer = 50
-    # dropout_mid_layer = 0.08
-
-    # nbr_layer = 2
-    # coef_neurone = 1
-    # coef_dropout = 1
-
-    # for i in range(nbr_layer):
-    #   neurone_prov = int(nbr_neurone_mid_layer * pow(coef_neurone, (nbr_layer - (i))))
-    #   model.add(Dense(neurone_prov, activation=activation))
-
-    #   if i != 0:
-    #     dropout_prov = dropout_mid_layer * pow(coef_dropout, (nbr_layer - (i)))
-    #     model.add(Dropout(dropout_prov))
-      
-    # model.add(Dense(nbr_neurone_mid_layer, activation=activation))
-    # model.add(Dropout(dropout_mid_layer))
-
-    # for i in range(nbr_layer):
-    #   neurone_prov = int(nbr_neurone_mid_layer * pow(coef_neurone, i+1))
-    #   model.add(Dense(neurone_prov, activation=activation))
-
-    #   if i != nbr_layer-1:
-    #     dropout_prov = dropout_mid_layer * pow(coef_dropout, i+1)
-    #     model.add(Dropout(dropout_prov))
+    model.add(Dropout(coeficient_dropout))
 
     model.add(Dense(len(data_y_one_hot[0]), activation='softmax'))
+    model.add(Dropout(coeficient_dropout))
 
     # compile the keras model
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_crossentropy', 'accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_crossentropy', 'accuracy', f1_m])
 
     # Fit the model
     # es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=200)

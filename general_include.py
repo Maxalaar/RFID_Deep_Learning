@@ -5,10 +5,18 @@ import tensorflow as tf
 import pickle
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import random
 from scipy.io import arff
 
 from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import Perceptron
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import f1_score
+from sklearn.ensemble import RandomForestClassifier
 
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
@@ -18,6 +26,7 @@ from keras.layers import Conv2D
 from keras.layers import Dropout
 from tensorflow.keras import layers
 from tensorflow.keras import regularizers
+
 
 from keras import backend as K
 

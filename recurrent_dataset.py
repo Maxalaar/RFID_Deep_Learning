@@ -196,31 +196,31 @@ def load_tracking_dataset(name_dataset):
 
     return X_tensor, Y_tensor
 
-def load_tracking_dataset_txt(name_dataset):
-    with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
-        dataset = []
-        lines = file_var.read().split('\n')
-        file_var.close()
+#  def load_tracking_dataset_txt(name_dataset):
+#     with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
+#         dataset = []
+#         lines = file_var.read().split('\n')
+#         file_var.close()
 
-        for i in range(0, len(lines)):
-            lines[i] = lines[i].split(',')
+#         for i in range(0, len(lines)):
+#             lines[i] = lines[i].split(',')
         
-        list_actual_path = []
-        actual_path_name = lines[1][0]
+#         list_actual_path = []
+#         actual_path_name = lines[1][0]
 
-        for i in range (1, len(lines)):
+#         for i in range (1, len(lines)):
             
-            if actual_path_name != lines[i][0]:
-                list_actual_path_np = np.array([list_actual_path], dtype=np.float32)
-                dataset.append(tf.convert_to_tensor(list_actual_path_np))
-                list_actual_path = []
-                actual_path_name = lines[i][0]
+#             if actual_path_name != lines[i][0]:
+#                 list_actual_path_np = np.array([list_actual_path], dtype=np.float32)
+#                 dataset.append(tf.convert_to_tensor(list_actual_path_np))
+#                 list_actual_path = []
+#                 actual_path_name = lines[i][0]
 
-            line = lines[i].copy()
-            del line[0]
-            list_actual_path.append(line)
+#             line = lines[i].copy()
+#             del line[0]
+#             list_actual_path.append(line)
         
-        return dataset
+#         return dataset
 
 def load_tracking_dataset_txt_for_fit(list_name_dataset):
     list_dataset_X = []
@@ -330,4 +330,19 @@ def evaluate_rnn_model(model, evaluation_dataset):
 
     print()
 
+def convert_recurrent_dataset_to_classic_dataset(data_x, data_y):
+    print("- Data formatting -")
+    
+    data_prov = []
+    for i in range(0, len(data_x)):
+        for j in range(0, len(data_x[i])):
+            data_prov.append(data_x[i][j])
+    data_x = np.array(data_prov)
 
+    data_prov = []
+    for i in range(0, len(data_y)):
+        for j in range(0, len(data_y[i])):
+            data_prov.append(data_y[i][j])
+    data_y = np.array(data_prov)
+
+    return data_x, data_y
