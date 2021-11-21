@@ -14,6 +14,7 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
 
     # Convert Y to one hot
     Y_one_hot = pd.get_dummies(dataset_df["class"])
+    df_class = dataset_df["class"]
     list_target_name = list(Y_one_hot.columns)
     dataset_df = dataset_df.copy().drop("class", axis=1)
     dataset_df = pd.concat([dataset_df, Y_one_hot], axis=1)
@@ -57,8 +58,6 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
 
         frame = []
         data = None
-        
-
 
         # add init zone in zone list
         if isinstance(num_repetitions_zone, int):
@@ -227,6 +226,8 @@ def load_tracking_dataset_txt_for_fit(list_name_dataset):
     list_dataset_Y = []
     list_label = []
 
+    class_name, class_one_hot = convert_one_hot_get_arrays()
+
     for name_dataset in list_name_dataset:
         # Creat dataset
         with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
@@ -271,7 +272,7 @@ def load_tracking_dataset_txt_for_fit(list_name_dataset):
                     dataset_Y_prov.append([list_zone[target]])
                 
                 list_dataset_Y.append(dataset_Y_prov)
-    
+
     # get size of the smallest paths
     size_smallest = float('inf')
     for dataset in list_dataset_X:
@@ -287,18 +288,23 @@ def load_tracking_dataset_txt_for_fit(list_name_dataset):
             list_dataset_Y[i].pop(index_element_to_remove)
 
     # Convert Y to one hot
-    label_encoder = preprocessing.LabelEncoder()
-    label_encoder.fit(np.array(list_label))
-    max_value_encoder = label_encoder.transform(np.array(list_label)).max()
+    # label_encoder = preprocessing.LabelEncoder()
+    # label_encoder.fit(np.array(list_label))
+    # max_value_encoder = label_encoder.transform(np.array(list_label)).max()
+
+    # for i in range(0, len(list_dataset_Y)):
+    #     for j in range(0, len(list_dataset_Y[i])):
+    #         # print(label_encoder.transform(list_dataset_Y[i][j][0]))
+    #         # print(np.array(list_dataset_Y[i][j]))
+    #         index_to_one = label_encoder.transform(np.array(list_dataset_Y[i][j]))
+    #         data_y_one_hot = np.zeros((1, max_value_encoder + 1))
+    #         data_y_one_hot[0, index_to_one] = 1
+    #         list_dataset_Y[i][j] = data_y_one_hot[0]
+
 
     for i in range(0, len(list_dataset_Y)):
         for j in range(0, len(list_dataset_Y[i])):
-            # print(label_encoder.transform(list_dataset_Y[i][j][0]))
-            # print(np.array(list_dataset_Y[i][j]))
-            index_to_one = label_encoder.transform(np.array(list_dataset_Y[i][j]))
-            data_y_one_hot = np.zeros((1, max_value_encoder + 1))
-            data_y_one_hot[0, index_to_one] = 1
-            list_dataset_Y[i][j] = data_y_one_hot[0]
+            list_dataset_Y[i][j] = convert_string_to_one_hot(class_name, class_one_hot, bytes(list_dataset_Y[i][j][0], 'utf-8'))
     
     # Convert list to np
     list_dataset_X = np.array(list_dataset_X).astype('float32')
@@ -346,3 +352,38 @@ def convert_recurrent_dataset_to_classic_dataset(data_x, data_y):
     data_y = np.array(data_prov)
 
     return data_x, data_y
+
+def convert_one_hot_get_arrays():
+    # Load the dataset
+    name_dataset = "kitchen_20cm"
+    dataset_data = arff.loadarff('./dataset/dataset_arff/'+str(name_dataset)+'.arff')
+
+    # Convert the dataset, arff to DataFram
+    dataset_df = pd.DataFrame(dataset_data[0])
+
+    # Convert Y to one hot
+    Y_one_hot = pd.get_dummies(dataset_df["class"])
+    df_class = dataset_df["class"]
+    list_target_name = list(Y_one_hot.columns)
+    dataset_df = dataset_df.copy().drop("class", axis=1)
+    dataset_one_hot = pd.concat([df_class, Y_one_hot], axis=1)
+
+    dataset_one_hot = dataset_one_hot.drop_duplicates(subset=['class'])
+    dataset_one_hot = dataset_one_hot.sort_values(by=['class'])
+
+    class_name = dataset_one_hot["class"]
+    class_one_hot = dataset_one_hot.drop(["class"], axis=1)
+
+    class_name = class_name.to_numpy()
+    class_one_hot = class_one_hot.to_numpy()
+
+    return class_name, class_one_hot
+
+def convert_string_to_one_hot(class_name, class_one_hot, string_class):
+    index = np.where(class_name == string_class)
+    value = class_one_hot[index[0]]
+    
+    if value == []:
+        return None
+    else :
+        return value[0]

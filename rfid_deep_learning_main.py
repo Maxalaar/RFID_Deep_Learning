@@ -47,22 +47,16 @@ if False :
 # Tree for txt
 if True :
     # create_tracking_dataset(10, 19, "kitchen_20cm", "v1_100_300_reccurrent_kitchen_20cm", 100, num_element_path=300, num_repetitions_zone=(20, 40), verbose=False)
-    
+
     data_X, data_Y = load_tracking_dataset("v1_100_300_reccurrent_kitchen_20cm")
     data_X, data_Y = convert_recurrent_dataset_to_classic_dataset(data_X, data_Y)
 
-    print(data_X[0])
-    print(data_Y[0])
-
-    # model = dense_neural_network_classifier(data_X, data_Y)
+    model = dense_neural_network_classifier(data_X, data_Y)
 
     data_X, data_Y = load_tracking_dataset_txt_for_fit(["kit_a", "kit_b", "kit_c", "kit_d"])
     data_X, data_Y = convert_recurrent_dataset_to_classic_dataset(data_X, data_Y)
 
-    print(data_X[0])
-    print(data_Y[0])
-
-    # model.evaluate(data_X, data_Y)
+    model.evaluate(data_X, data_Y)
 
     # data_X, data_Y = load_tracking_dataset("v1_100_300_reccurrent_kitchen_20cm")
 
