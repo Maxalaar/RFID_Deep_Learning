@@ -8,7 +8,7 @@ def recurrent_neural_network_classifier_for_text_dataset(data_x=[], data_y=[], v
 
     # activation = 'tanh'
     activation = 'LeakyReLU'
-    coeficient_dropout = 0.05
+    coeficient_dropout = 0.10
     batch_size = 128*2*2
     epochs_size = 600*2
 
@@ -18,7 +18,7 @@ def recurrent_neural_network_classifier_for_text_dataset(data_x=[], data_y=[], v
 
         model.add(tf.keras.Input(shape=(len(data_x[0]), len(data_x[0][0]))))
 
-        model.add(tf.keras.layers.GaussianNoise(10))
+        # model.add(tf.keras.layers.GaussianNoise(10))
 
         model.add(Dense(150, activation=activation))
         model.add(Dropout(coeficient_dropout))
@@ -76,12 +76,29 @@ def recurrent_neural_network_classifier_synt_tracking_dataset(data_x=[], data_y=
 
         # model.add(tf.keras.layers.GaussianNoise(15))
 
-        model.add(tf.keras.layers.SimpleRNN(150, return_sequences=True, activation=activation, recurrent_dropout=coeficient_dropout, batch_input_shape=(batch_size, len(data_x[0]), len(data_x[0][0]))))
+        # model.add(tf.keras.layers.SimpleRNN(150, return_sequences=True, activation=activation, recurrent_dropout=coeficient_dropout, batch_input_shape=(batch_size, len(data_x[0]), len(data_x[0][0]))))
 
-        model.add(Dense(150, activation=activation))
+        # model.add(Dense(150, activation=activation))
+        # model.add(Dropout(coeficient_dropout))
+
+        # model.add(Dense(150, activation=activation))
+        # model.add(Dropout(coeficient_dropout))
+
+        model.add(Dense(50, activation=activation))
         model.add(Dropout(coeficient_dropout))
 
-        model.add(Dense(150, activation=activation))
+        model.add(Dense(50, activation=activation))
+        model.add(Dropout(coeficient_dropout))
+
+        model.add(Dense(50, activation=activation))
+        model.add(Dropout(coeficient_dropout))
+
+        model.add(Dense(50, activation=activation))
+        model.add(Dropout(coeficient_dropout))
+
+        model.add(tf.keras.layers.SimpleRNN(60, return_sequences=True, activation=activation, recurrent_dropout=0, batch_input_shape=(batch_size, len(data_x[0]), len(data_x[0][0]))))
+
+        model.add(Dense(50, activation=activation))
         model.add(Dropout(coeficient_dropout))
 
         model.add(Dense(len(data_y[0][0]), activation='softmax'))

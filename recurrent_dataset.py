@@ -179,6 +179,8 @@ def create_tracking_dataset(num_colonne_room, num_row_room, name_dataset, name_s
     pickle.dump(Y_tensor, open_file)
     open_file.close()
 
+    return X_tensor, Y_tensor
+
 def load_tracking_dataset(name_dataset):
     print()
     print("--- Load Tracking Dataset ---")
@@ -194,32 +196,6 @@ def load_tracking_dataset(name_dataset):
     open_file.close()
 
     return X_tensor, Y_tensor
-
-#  def load_tracking_dataset_txt(name_dataset):
-#     with open("./dataset/dataset_txt/"+ str(name_dataset) +".txt") as file_var:
-#         dataset = []
-#         lines = file_var.read().split('\n')
-#         file_var.close()
-
-#         for i in range(0, len(lines)):
-#             lines[i] = lines[i].split(',')
-        
-#         list_actual_path = []
-#         actual_path_name = lines[1][0]
-
-#         for i in range (1, len(lines)):
-            
-#             if actual_path_name != lines[i][0]:
-#                 list_actual_path_np = np.array([list_actual_path], dtype=np.float32)
-#                 dataset.append(tf.convert_to_tensor(list_actual_path_np))
-#                 list_actual_path = []
-#                 actual_path_name = lines[i][0]
-
-#             line = lines[i].copy()
-#             del line[0]
-#             list_actual_path.append(line)
-        
-#         return dataset
 
 def load_tracking_dataset_txt_for_fit(list_name_dataset):
     list_dataset_X = []
@@ -287,21 +263,6 @@ def load_tracking_dataset_txt_for_fit(list_name_dataset):
             list_dataset_X[i].pop(index_element_to_remove)
             list_dataset_Y[i].pop(index_element_to_remove)
 
-    # Convert Y to one hot
-    # label_encoder = preprocessing.LabelEncoder()
-    # label_encoder.fit(np.array(list_label))
-    # max_value_encoder = label_encoder.transform(np.array(list_label)).max()
-
-    # for i in range(0, len(list_dataset_Y)):
-    #     for j in range(0, len(list_dataset_Y[i])):
-    #         # print(label_encoder.transform(list_dataset_Y[i][j][0]))
-    #         # print(np.array(list_dataset_Y[i][j]))
-    #         index_to_one = label_encoder.transform(np.array(list_dataset_Y[i][j]))
-    #         data_y_one_hot = np.zeros((1, max_value_encoder + 1))
-    #         data_y_one_hot[0, index_to_one] = 1
-    #         list_dataset_Y[i][j] = data_y_one_hot[0]
-
-
     for i in range(0, len(list_dataset_Y)):
         for j in range(0, len(list_dataset_Y[i])):
             list_dataset_Y[i][j] = convert_string_to_one_hot(class_name, class_one_hot, bytes(list_dataset_Y[i][j][0], 'utf-8'))
@@ -338,6 +299,7 @@ def evaluate_rnn_model(model, evaluation_dataset):
 
 def convert_recurrent_dataset_to_classic_dataset(data_x, data_y):
     print("- Data formatting -")
+    print()
     
     data_prov = []
     for i in range(0, len(data_x)):
